@@ -1,0 +1,113 @@
+//codigo para los leds 
+
+#Colocamos los modulos necesarios 
+from machine import Pin
+from time import sleep
+
+ledPin= Pin(12, Pin.OUT)
+led2Pin= Pin(13, Pin.OUT)
+
+while True:
+  ledPin.value(not ledPin.value())
+  led2Pin.value(not ledPin.value())
+  sleep(1)
+
+
+// codigo de el motor
+
+//libreria para sht
+#include "DHTesp.h"
+//Libreria para Servo
+#include <ESP32Servo.h>
+
+Servo servo;
+int servoPin = 32;
+int sensorPin=15;
+DHTesp sensor;
+
+void setup() {
+  Serial.begin(115200);
+  //Configurar Servo
+  servo.attach(servoPin);
+    pinMode(sensorPin, INPUT);
+    sensor.setup(sensorPin,DHTesp::DHT22);
+}
+
+void loop() {
+ 
+    TempAndHumidity lectura =sensor.getTempAndHumidity();
+    Serial.println("Temperatura"+String(lectura.temperature,1)+"°C");
+    delay(1000);
+    if(lectura.temperature>=30){
+      servo.write(90);
+
+ 
+    }else{
+      servo.write(0);
+
+    }
+}
+
+//codigo para las bocinas 
+from machine import Pin, PWM
+from hcsr04 import HCSR04
+from time import sleep
+
+# Creamos el objeto HCSR04
+sensor = HCSR04(trigger_pin=5, echo_pin=18, echo_timeout_us=24000)
+
+# Inicio del zumbador
+buzzer = PWM(Pin(2), freq=440, duty=0)  # Inicialmente, el zumbador está apagado
+
+# Define el tono de Spider-Man
+spiderman_melody = [
+    (330, 0.2),  # Mi
+    (349, 0.2),  # Fa
+    (392, 0.2),  # Sol
+    (330, 0.2),  # Mi
+    (392, 0.2),  # Sol
+    (330, 0.2),  # Mi
+    (294, 0.2),  # Re
+    (330, 0.2),  # Mi
+    (349, 0.2),  # Fa
+    (392, 0.2),  # Sol
+    (330, 0.2),  # Mi
+    (294, 0.2),  # Re
+    (330, 0.2),  # Mi
+    (330, 0.2),  # Mi
+    (349, 0.2),  # Fa
+    (392, 0.2),  # Sol
+    (440, 0.2),  # La
+    (392, 0.2),  # Sol
+    (349, 0.2),  # Fa
+    (330, 0.2),  # Mi
+]
+
+# Función para tocar una melodía
+def play_melody(melody, tempo):
+    for note in melody:
+        frequency, duration = note
+        buzzer.freq(frequency)
+        buzzer.duty(512)
+        sleep(duration * tempo)
+    buzzer.duty(0)
+
+# Ciclo infinito
+while True:
+    distancia = sensor.distance_cm()
+    print("Distancia:", distancia, "centímetros")
+    
+    # Define la distancia umbral para activar el tono de Spider-Man
+    distancia_umbral = 10  # Puedes ajustar este valor
+    
+    if distancia <=100:
+        play_melody(spiderman_melody, 0.8)  # Reproducir la melodía de Spider-Man
+    else:
+        buzzer.duty(0)  # Apagar el zumbador si no se cumple la condición
+    
+    sleep(1)
+
+
+
+
+
